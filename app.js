@@ -5,14 +5,12 @@ var gumStream; 						//stream from getUserMedia()
 var rec; 							//Recorder.js object
 var input; 							//MediaStreamAudioSourceNode we'll be recording
 
-// shim for AudioContext when it's not avb. 
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioContext //audio context to help us record
 
 var recordButton = document.getElementById("recordButton");
 var stopButton = document.getElementById("stopButton");
 
-//add events to those 2 buttons
 recordButton.addEventListener("click", startRecording);
 stopButton.addEventListener("click", stopRecording);
 
@@ -110,17 +108,19 @@ function createDownloadLink(blob) {
 	upload.innerHTML = "Upload";
 	upload.addEventListener("click", function(event){
 		// get location
-		navigator.geolocation.getCurrentPosition(function(postion){
-			console.log("get location");
-			console.log(postion.coords);
+		navigator.geolocation.getCurrentPosition(function(position){
+			console.log(position.coords);
 			var xhr=new XMLHttpRequest();
 			xhr.onload=function(e) {
 				if(this.readyState === 4) {
 					console.log("Server returned: ",e.target.responseText);
+					say( e.target.responseText);
 				}
 			};
 			var fd=new FormData();
 			fd.append("audio_data",blob, filename);
+			fd.append("latitude", position.coords.latitude);
+			fd.append("longitude", position.coords.longitude);
 			xhr.open("POST","upload.php",true);
 			xhr.send(fd);  
 		},function() {
@@ -132,4 +132,9 @@ function createDownloadLink(blob) {
 
 	//add the li element to the ol
 	recordingsList.appendChild(li);
+}
+
+function say(text) {
+	var ss = new SpeechSynthesisUtterance(text);
+	speechSynthesis.speak(ss);
 }
