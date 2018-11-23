@@ -113,8 +113,25 @@ function createDownloadLink(blob) {
 			var xhr=new XMLHttpRequest();
 			xhr.onload=function(e) {
 				if(this.readyState === 4) {
-					console.log("Server returned: ",e.target.responseText);
-					say( e.target.responseText);
+					// console.log("Server returned: ",e.target.responseText);
+					var returnValue = JSON.parse(e.target.responseText);
+					console.log(returnValue);
+					switch (returnValue.type) {
+						case 'Word':
+							returnValue.features.forEach(function(val){
+								say(val);
+							})
+							break;
+						case 'FeatureCollection':
+							console.log('Show map');
+							break;
+						case 'Collection':
+							console.log('Show list');
+							break;
+						default:
+							console.log('Others');
+							break;
+					}
 				}
 			};
 			var fd=new FormData();

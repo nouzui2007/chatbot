@@ -5,9 +5,14 @@ require __DIR__ . '/vendor/autoload.php';
 
 require_once __DIR__ . '/database.php';
 
-
 # Imports the Google Cloud client library
 use Google\Cloud\Speech\SpeechClient;
+
+// 特定ワード
+$keywords = array(
+    '公園',
+    '公民館'
+);
 
 $longitude = $_POST['longitude'];
 $latitude = $_POST['latitude'];
@@ -36,29 +41,23 @@ $options = [
     'encoding' => 'FLAC',
 ];
 
-// $results = $speech->recognize(fopen($flac, 'r'), $options);
+$results = $speech->recognize(fopen($flac, 'r'), $options);
 
-// $text = "";
-// if (!empty($results)) {
-//     $text = $results[0]->alternatives()[0]['transcript'];
-// }
-$text = "公園";
-
-// TODO 結果から特定ワードの場合は地図画面へ
-if (strpos($text, '公園') !== false) {
-    $rs = read_db("select * from place where geom is not null and category like '%" . $text . "%'");
-    if ($rs) {
-        // TODO geojson
-        echo $text;
-    } else {
-        echo "該当データがありませんでした";
-    }
-} else {
-    $rs = read_db("select * from place where and category like '%" . $text . "%'");
-    if ($rs) {
-        // TODO json
-        echo $text;
-    } else {
-        echo "該当データがありませんでした";
-    }
+$text = "";
+if (!empty($results)) {
+    $text = $results[0]->alternatives()[0]['transcript'];
 }
+
+$json = false;
+foreach ($keywords as $keyword) {
+    if (strpos($text, $keyword) !== false) {
+        $json = get_data($keyword, true);
+        break;
+    }    
+}
+if (!$json) {
+    $json = get_data($text);
+}
+
+header('Content-type: application/json');
+echo @json_encode($json);
