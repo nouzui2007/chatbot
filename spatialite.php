@@ -10,7 +10,8 @@
 # we'll actually use an IN-MEMORY DB
 # so to avoid any further complexity;
 # an IN-MEMORY DB simply is a temp-DB 
-$db = new SQLite3('spatialite.sqlite3');
+$db = new SQLite3(':memory:');
+// $db = new SQLite3('sample.db');
 
 # loading SpatiaLite as an extension
 $db->loadExtension('libspatialite.so.5');
